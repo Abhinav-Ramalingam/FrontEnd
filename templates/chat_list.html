@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="chat-list-container">
+    <h2 class="text-2xl font-bold text-center mb-4">Chat List</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for chat in chats %}
+        <div class="chat-item bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+            <a href="{{ url_for('chat', chat_id=chat.id) }}" class="chat-link text-center text-lg font-semibold text-blue-600 hover:underline">
+                Chat with {{ chat.name }}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('intro') }}" class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-300">Back to Intro</a>
+</div>
+{% endblock %}
