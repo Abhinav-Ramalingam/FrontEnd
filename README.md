@@ -1,121 +1,64 @@
-# Project Name
+# Raspberry Pi Chat Application
 
 ## Overview
-This project is designed to [brief description of the project]. The application leverages [technologies, libraries, or frameworks] to achieve [goal or functionality].
+This project is designed to provide a basic front end for communication between two Raspberry Pi devices. The application uses Flask to serve the web interface, with Jinja2 for templating dynamic content. Tailwind CSS and DaisyUI are utilized to enhance the visual appeal of the application.
 
 ## Prerequisites
 Ensure you have the following installed on your system:
 
-- [Programming Language] (e.g., Python, Node.js)
-- Git
-- [Database or other dependencies if applicable]
-- [Other tools/libraries]
+- **Python** (preferably latest version)
+- **pip** (Python package installer)
+- **Flask** (for backend functionality)
 
-### Installation on Linux/macOS
+### Installation Instructions
 
-#### 1. Clone the Repository
-First, clone the repository to your local machine:
-```bash
-git clone https://github.com/yourusername/your-repository.git
-cd your-repository
-```
+#### 1. Install Python
 
-#### 2. Install Dependencies
-Run the following command to install necessary dependencies.
-
-- For Python (with `pip`):
+- **Linux** (Debian-based):
   ```bash
-  pip install -r requirements.txt
+  sudo apt update
+  sudo apt install python3 python3-pip
   ```
 
-- For Node.js (with `npm`):
+- **macOS** (using Homebrew):
   ```bash
-  npm install
+  brew install python
   ```
 
-#### 3. Configure Git (optional)
-Make sure to set your Git username and email if not already done:
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "your-email@example.com"
-```
+#### 2. Install pip (if not already installed)
 
-#### 4. Running the Project
-To start the project, use the following commands:
-
-- For Python:
+- **Linux**:
   ```bash
-  python app.py
+  sudo apt install python3-pip
   ```
 
-- For Node.js:
+- **macOS**: (pip is included with Python installation via Homebrew)
+
+#### 3. Set Up a Virtual Environment
+
+- **Linux and macOS**:
   ```bash
-  npm start
+  python3 -m venv venv
   ```
 
-## Common Git Commands
+#### 4. Activate the Virtual Environment
 
-### Initialize Git
-To initialize a Git repository:
-```bash
-git init
-```
-
-### Add and Commit Changes
-```bash
-git add .
-git commit -m "Commit message"
-```
-
-### Push to Remote
-If this is your first push:
-```bash
-git remote add origin https://github.com/yourusername/your-repository.git
-git push -u origin main
-```
-
-For subsequent pushes:
-```bash
-git push
-```
-
-### Handling Divergent Branches
-If you encounter divergent branches, you may need to run:
-```bash
-git pull --rebase
-```
-
-or
-
-```bash
-git pull --merge
-```
-
-Choose the appropriate strategy based on your needs.
-
-### De-initialize Git
-To remove Git tracking from the project:
-```bash
-rm -rf .git
-```
-
-## Platform Differences
-Most commands are identical for Linux and macOS. However, here are a few platform-specific differences:
-
-- **Installing Git**:
-  - **macOS**: 
-    ```bash
-    brew install git
-    ```
-  - **Linux (Debian-based)**: 
-    ```bash
-    sudo apt install git
-    ```
-
-- **File Permissions**: If you encounter permission issues, you can make a file executable:
+- **Linux and macOS**:
   ```bash
-  chmod +x script.sh
+  source venv/bin/activate
   ```
 
-## License
-This project is licensed under the [LICENSE NAME]. See the `LICENSE` file for more details.
+#### 5. Install Dependencies
+Run the following command to install necessary dependencies:
+
+- **Linux and macOS**:
+```bash
+pip install flask 
+```
+
+#### 6. Running the Project
+To start the project, use the following command:
+
+```bash
+python main.py
+```
