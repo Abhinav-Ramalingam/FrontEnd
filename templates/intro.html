@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero bg-base-200 min-h-screen">
+    <div class="hero-content flex-col lg:flex-row">
+        <img
+        src="{{ url_for('static', filename='media/pichat.jpeg') }}"
+        class="max-w-sm rounded-lg shadow-2xl" />
+      <div>
+        <h1 class="text-5xl font-bold">Welcome to Π-Squared!</h1>
+        <p class="py-6">
+            This application serves as a communication platform between two Raspberry Pi devices using the MQTT protocol. 
+            Here, you can explore the functionalities that enable real-time data exchange, messaging, and interaction 
+            between these devices. Join us as we delve into the fascinating world of IoT!
+        </p>
+        <a href="{{ url_for('chat') }}" class="btn btn-active btn-primary">Go to Chat</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
