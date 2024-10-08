@@ -10,7 +10,7 @@ Ensure you have the following installed on your system:
 - **pip** (Python package installer)
 - **Flask** (for backend functionality)
 
-### Installation Instructions
+## Installation Instructions
 
 #### 1. Install Python
 
