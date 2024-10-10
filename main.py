@@ -105,7 +105,7 @@ def send_message():
         "deviceID": device_id,
         "message": message
     }
-    print('payload: ', payload)
+    # print('payload: ', payload)
     # Publish the message to the MQTT topic
     client.publish(topic, json.dumps(payload), 2, properties=properties)
 
