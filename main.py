@@ -59,6 +59,7 @@ def intro():
 def chat_main():
     if request.method == 'POST':
         chat_code = request.form['chatCode']  # Get chat code from the form input
+        username = request.form['username']  # Get the username from the form input
         chat_code_with_topic = 'topic/' + chat_code  # Append "topic/" for the logger request
         
         # Make a request to the logger service to get chat messages
@@ -72,7 +73,9 @@ def chat_main():
             # Subscribe to the topic dynamically
             client.subscribe(chat_code_with_topic, qos=2)  # Subscribe to the topic here
             print("Subscribed to", chat_code_with_topic)
-            return render_template('chat.html', title=chat_name, chat_name=chat_name, chat_id=chat_code, messages=messages)  
+
+            # Pass the username to the chat.html template
+            return render_template('chat.html', title=chat_name, chat_name=chat_name, chat_id=chat_code, messages=messages, chat_username=username)  
         else:
             abort(404)  # Handle errors appropriately
 
