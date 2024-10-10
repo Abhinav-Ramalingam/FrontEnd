@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     form.addEventListener('submit', function(event) {
+        console.log('submiteing the dform akhsvd')
         event.preventDefault();  // Prevents the form from submitting the normal way (i.e., reloading the page)
 
         var formData = new FormData(form);
