@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.getElementById('messageForm');
 
+    // Event source for receiving messages
+    const eventSource = new EventSource('/events');
+
+    eventSource.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        // Only append messages from others
+        if (message.username !== document.querySelector('input[name="username"]').value) {
+            appendMessage(message);
+        }
+    };
+
     form.addEventListener('submit', function(event) {
         event.preventDefault();  // Prevents the form from submitting the normal way (i.e., reloading the page)
 
@@ -14,8 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
             deviceID: formData.get('username'),  // You can modify this or set dynamically
             message: formData.get('message')
         };
-
-        console.log(payload);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/send_message/', true);
@@ -37,37 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Send the payload as JSON
         xhr.send(JSON.stringify(payload));
     });
-
-    // Function to start long polling for receiving messages
-    function longPoll() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/receive_messages/', true);  // Long polling endpoint
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    var messages = JSON.parse(xhr.responseText);
-                    messages.forEach(function(message) {
-                        // Only append messages from others
-                        if (message.username !== document.querySelector('input[name="username"]').value) {
-                            appendMessage(message);
-                        }
-                    });
-                    // Immediately initiate the next long poll after a delay
-                    setTimeout(longPoll, 2000);  // Wait 2 seconds before the next poll
-                } else {
-                    console.error("Error receiving messages:", xhr.responseText);
-                    // Retry after a short delay in case of error
-                    setTimeout(longPoll, 2000);  // Retry after 2 seconds
-                }
-            }
-        };
-
-        xhr.send();
-    }
-
-    // Start long polling
-    longPoll();
 
     function appendMessage(payload) {
         var messagesDiv = document.getElementById('messages');

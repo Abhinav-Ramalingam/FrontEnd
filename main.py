@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, request, jsonify
+from flask import Flask, render_template, abort, request, jsonify, Response
 import bcrypt
 import base64
 import requests  # For HTTP requests to the logger
@@ -8,6 +8,7 @@ from paho.mqtt.properties import Properties
 from paho.mqtt.packettypes import PacketTypes
 from datetime import datetime
 import time
+from threading import Event
 
 app = Flask(__name__)
 
@@ -25,8 +26,9 @@ client.username_pw_set(BROKER_USER, BROKER_PASSWORD)
 properties = Properties(PacketTypes.PUBLISH)
 properties.MessageExpiryInterval = 30  # in seconds
 
-# Store messages in memory for long polling
+# Store messages in memory for SSE
 messages_store = []
+message_event = Event()
 
 # Global variable for username
 global_username = None
@@ -34,12 +36,11 @@ global_username = None
 # Callback for handling incoming messages
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload)
-     # Log the received message for now
-
     # Store the received message in memory only if it's not from the current user
     if payload['username'] != global_username:
         print("Received message:", payload) 
         messages_store.append(payload)
+        message_event.set()  # Notify that a new message has arrived
 
 # Callback for handling connection events
 def on_connect(client, userdata, flags, reason_code):
@@ -105,23 +106,23 @@ def send_message():
         "deviceID": device_id,
         "message": message
     }
-    # print('payload: ', payload)
     # Publish the message to the MQTT topic
     client.publish(topic, json.dumps(payload), 2, properties=properties)
 
     return jsonify({"status": "Message sent", "payload": payload})
 
-@app.route('/receive_messages/', methods=['GET'])
-def receive_messages():
-    """Long polling endpoint to receive new chat messages."""
-    # Hold the request until there are new messages
-    global messages_store
-    while not messages_store:  # Wait until there are messages
-        time.sleep(1)  # Sleep for a bit to avoid a busy wait
-    # Return all messages and clear the store for the next polling
-    messages = messages_store[:]
-    messages_store.clear()  # Clear the store for the next round
-    return jsonify(messages)
+# SSE endpoint
+@app.route('/events')
+def events():
+    def generate_events():
+        while True:
+            message_event.wait()  # Wait for a new message
+            message_event.clear()  # Reset the event
+            if messages_store:
+                message = messages_store.pop(0)  # Get the first message
+                yield f"data: {json.dumps(message)}\n\n"  # Send the message to the client
+
+    return Response(generate_events(), content_type='text/event-stream')
 
 # Custom error handler for 404 errors
 @app.errorhandler(404)
