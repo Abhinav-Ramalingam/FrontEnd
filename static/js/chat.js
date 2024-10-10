@@ -1,16 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.getElementById('messageForm');
+    var socket = io();  // Initialize SocketIO client
 
-    // Event source for receiving messages
-    const eventSource = new EventSource('/events');
-
-    eventSource.onmessage = function(event) {
-        const message = JSON.parse(event.data);
+    // Listen for new messages from the server
+    socket.on('new_message', function(message) {
         // Only append messages from others
         if (message.username !== document.querySelector('input[name="username"]').value) {
             appendMessage(message);
         }
-    };
+    });
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();  // Prevents the form from submitting the normal way (i.e., reloading the page)

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, request, jsonify, Response
+from flask import Flask, render_template, abort, request, jsonify
 import bcrypt
 import base64
 import requests  # For HTTP requests to the logger
@@ -6,11 +6,10 @@ import json
 import paho.mqtt.client as mqtt
 from paho.mqtt.properties import Properties
 from paho.mqtt.packettypes import PacketTypes
-from datetime import datetime
-import time
-from threading import Event
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+socketio = SocketIO(app)  # Initialize SocketIO
 
 # MQTT Broker Configuration
 BROKER_IP = '192.168.0.206'
@@ -24,11 +23,6 @@ client.username_pw_set(BROKER_USER, BROKER_PASSWORD)
 
 # Properties for MQTT
 properties = Properties(PacketTypes.PUBLISH)
-properties.MessageExpiryInterval = 30  # in seconds
-
-# Store messages in memory for SSE
-messages_store = []
-message_event = Event()
 
 # Global variable for username
 global_username = None
@@ -39,8 +33,8 @@ def on_message(client, userdata, msg):
     # Store the received message in memory only if it's not from the current user
     if payload['username'] != global_username:
         print("Received message:", payload) 
-        messages_store.append(payload)
-        message_event.set()  # Notify that a new message has arrived
+        # Emit the message to all connected WebSocket clients
+        socketio.emit('new_message', payload)  # Broadcast to all clients
 
 # Callback for handling connection events
 def on_connect(client, userdata, flags, reason_code):
@@ -111,23 +105,6 @@ def send_message():
 
     return jsonify({"status": "Message sent", "payload": payload})
 
-# SSE endpoint
-@app.route('/events')
-def events():
-    def generate_events():
-        while True:
-            message_event.wait()  # Wait for a new message
-            message_event.clear()  # Reset the event
-            if messages_store:
-                message = messages_store.pop(0)  # Get the first message
-                yield f"data: {json.dumps(message)}\n\n"  # Send the message to the client
-
-    return Response(generate_events(), content_type='text/event-stream')
-
-# Custom error handler for 404 errors
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('404.html'), 404
-
+# Run the SocketIO server
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=8000, debug=True)
