@@ -7,6 +7,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.properties import Properties
 from paho.mqtt.packettypes import PacketTypes
 from datetime import datetime
+import time
 
 app = Flask(__name__)
 
@@ -24,17 +25,20 @@ client.username_pw_set(BROKER_USER, BROKER_PASSWORD)
 properties = Properties(PacketTypes.PUBLISH)
 properties.MessageExpiryInterval = 30  # in seconds
 
+# Store messages in memory for long polling
+messages_store = []
+
 # Callback for handling incoming messages
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload)
     print("Received message:", payload)  # Log the received message for now
 
-    # You can add logic here to update your chat interface if necessary
+    # Store the received message in memory
+    messages_store.append(payload)
 
 # Callback for handling connection events
 def on_connect(client, userdata, flags, reason_code):
     print("Connected with result code:", reason_code)
-    # Subscribe to a default topic or take dynamic action based on application logic
 
 # Assign the callbacks to the client
 client.on_connect = on_connect
@@ -100,6 +104,18 @@ def send_message():
     client.publish(topic, json.dumps(payload), 2, properties=properties)
 
     return jsonify({"status": "Message sent", "payload": payload})
+
+@app.route('/receive_messages/', methods=['GET'])
+def receive_messages():
+    """Long polling endpoint to receive new chat messages."""
+    # Hold the request until there are new messages
+    global messages_store
+    while not messages_store:  # Wait until there are messages
+        time.sleep(1)  # Sleep for a bit to avoid a busy wait
+    # Return all messages and clear the store for the next polling
+    messages = messages_store
+    messages_store = []
+    return jsonify(messages)
 
 # Custom error handler for 404 errors
 @app.errorhandler(404)

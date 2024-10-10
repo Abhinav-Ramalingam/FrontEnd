@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.getElementById('messageForm');
 
+    // Variable to track the number of messages displayed
+    var currentMessageCount = 0;
+
     form.addEventListener('submit', function(event) {
         event.preventDefault();  // Prevents the form from submitting the normal way (i.e., reloading the page)
 
@@ -15,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
             message: formData.get('message')
         };
 
-        console.log(payload)
+        console.log(payload);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/send_message/', true);
@@ -38,11 +41,47 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.send(JSON.stringify(payload));
     });
 
+    // Function to start long polling for receiving messages
+    function longPoll() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/receive_messages/', true);  // Long polling endpoint
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var messages = JSON.parse(xhr.responseText);
+                    if (messages.length > currentMessageCount) {
+                        // If there are new messages, update the current message count
+                        messages.forEach(function(message, index) {
+                            // Only display new messages
+                            if (index >= currentMessageCount) {
+                                appendMessage(message);
+                            }
+                        });
+                        // Update the current message count to the new count
+                        currentMessageCount = messages.length;
+                    }
+                    // Immediately initiate the next long poll after a delay
+                    setTimeout(longPoll, 2000);  // Wait 2 seconds before the next poll
+                } else {
+                    console.error("Error receiving messages:", xhr.responseText);
+                    // Retry after a short delay in case of error
+                    setTimeout(longPoll, 2000);  // Retry after 2 seconds
+                }
+            }
+        };
+
+        xhr.send();
+    }
+
+    // Start long polling
+    longPoll();
+
     function appendMessage(payload) {
         var messagesDiv = document.getElementById('messages');
 
         var newMessageDiv = document.createElement('div');
-        newMessageDiv.className = payload.username === 'test' ? 'chat chat-start' : 'chat chat-end';
+        newMessageDiv.className = payload.username === document.querySelector('input[name="username"]').value ? 'chat chat-end' : 'chat chat-start';
 
         var messageHtml = `
             <div class="chat-image avatar">
