@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var payload = {
             topic: formData.get('topic'),
             username: formData.get('username'),
-            deviceID: "testID",  // You can modify this or set dynamically
+            deviceID: formData.get('username'),  // You can modify this or set dynamically
             message: formData.get('message')
         };
 

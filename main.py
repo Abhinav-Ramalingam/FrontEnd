@@ -15,7 +15,6 @@ BROKER_IP = '192.168.0.206'
 BROKER_PORT = 1883
 BROKER_USER = 'abhinavram2002'
 BROKER_PASSWORD = '@209AoRQeFkeW'
-DEVICE_ID = 'testID'
 
 # MQTT setup
 client = mqtt.Client()
@@ -88,7 +87,7 @@ def send_message():
     message = data.get('message')
     topic = data.get('topic')
     username = data.get('username')  # Default to 'abhinav' if not provided
-    device_id = data.get('deviceID', DEVICE_ID)
+    device_id = data.get('deviceID')
 
     # Format the payload
     payload = {
@@ -108,4 +107,4 @@ def not_found(error):
     return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
