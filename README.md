@@ -54,6 +54,8 @@ Run the following command to install necessary dependencies:
 - **Linux and macOS**:
 ```bash
 pip install flask 
+pip install flask_socketio
+pip install bcrypt
 ```
 
 #### 6. Running the Project
