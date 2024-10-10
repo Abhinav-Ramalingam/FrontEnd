@@ -28,13 +28,17 @@ properties.MessageExpiryInterval = 30  # in seconds
 # Store messages in memory for long polling
 messages_store = []
 
+# Global variable for username
+global_username = None
+
 # Callback for handling incoming messages
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload)
     print("Received message:", payload)  # Log the received message for now
 
-    # Store the received message in memory
-    messages_store.append(payload)
+    # Store the received message in memory only if it's not from the current user
+    if payload['username'] != global_username:
+        messages_store.append(payload)
 
 # Callback for handling connection events
 def on_connect(client, userdata, flags, reason_code):
@@ -60,9 +64,10 @@ def intro():
 
 @app.route('/chat/', methods=['GET', 'POST'])
 def chat_main():
+    global global_username  # Use global variable
     if request.method == 'POST':
         chat_code = request.form['chatCode']  # Get chat code from the form input
-        username = request.form['username']  # Get the username from the form input
+        global_username = request.form['username']  # Store the username in a global variable
         chat_code_with_topic = 'topic/' + chat_code  # Append "topic/" for the logger request
         
         # Make a request to the logger service to get chat messages
@@ -78,7 +83,7 @@ def chat_main():
             print("Subscribed to", chat_code_with_topic)
 
             # Pass the username to the chat.html template
-            return render_template('chat.html', title=chat_name, chat_name=chat_name, chat_id=chat_code, messages=messages, chat_username=username)  
+            return render_template('chat.html', title=chat_name, chat_name=chat_name, chat_id=chat_code, messages=messages, chat_username=global_username)  
         else:
             abort(404)  # Handle errors appropriately
 
@@ -99,7 +104,7 @@ def send_message():
         "deviceID": device_id,
         "message": message
     }
-    print('payload: ',payload)
+    print('payload: ', payload)
     # Publish the message to the MQTT topic
     client.publish(topic, json.dumps(payload), 2, properties=properties)
 
@@ -113,8 +118,8 @@ def receive_messages():
     while not messages_store:  # Wait until there are messages
         time.sleep(1)  # Sleep for a bit to avoid a busy wait
     # Return all messages and clear the store for the next polling
-    messages = messages_store
-    messages_store = []
+    messages = messages_store[:]
+    messages_store.clear()  # Clear the store for the next round
     return jsonify(messages)
 
 # Custom error handler for 404 errors

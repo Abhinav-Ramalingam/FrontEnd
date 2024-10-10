@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.getElementById('messageForm');
 
-    // Variable to track the number of messages displayed
-    var currentMessageCount = 0;
-
     form.addEventListener('submit', function(event) {
         event.preventDefault();  // Prevents the form from submitting the normal way (i.e., reloading the page)
 
@@ -29,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (xhr.status === 200) {
                     // Clear the input field
                     messageInput.value = '';
-                    // Optionally, append the new message to the chat display dynamically
+                    // Append the new message to the chat display dynamically
                     appendMessage(payload);  // Call function to display the message
                 } else {
                     console.error("Error sending message:", xhr.responseText);
@@ -50,17 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     var messages = JSON.parse(xhr.responseText);
-                    if (messages.length > currentMessageCount) {
-                        // If there are new messages, update the current message count
-                        messages.forEach(function(message, index) {
-                            // Only display new messages
-                            if (index >= currentMessageCount) {
-                                appendMessage(message);
-                            }
-                        });
-                        // Update the current message count to the new count
-                        currentMessageCount = messages.length;
-                    }
+                    messages.forEach(function(message) {
+                        // Only append messages from others
+                        if (message.username !== document.querySelector('input[name="username"]').value) {
+                            appendMessage(message);
+                        }
+                    });
                     // Immediately initiate the next long poll after a delay
                     setTimeout(longPoll, 2000);  // Wait 2 seconds before the next poll
                 } else {
