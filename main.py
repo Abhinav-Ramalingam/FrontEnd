@@ -34,10 +34,11 @@ global_username = None
 # Callback for handling incoming messages
 def on_message(client, userdata, msg):
     payload = json.loads(msg.payload)
-    print("Received message:", payload)  # Log the received message for now
+     # Log the received message for now
 
     # Store the received message in memory only if it's not from the current user
     if payload['username'] != global_username:
+        print("Received message:", payload) 
         messages_store.append(payload)
 
 # Callback for handling connection events
