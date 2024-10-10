@@ -4,13 +4,40 @@
 <div class="chat-container">
     <h2 class="text-2xl font-bold text-center">Chat with {{ chat_name }}</h2>
     <div class="chat-box">
-        <div id="messages" class="messages"></div>
-        <div class="input-container">
-            <input type="text" id="messageInput" class="message-input" placeholder="Type your message here..." />
-            <button id="sendButton" class="btn btn-primary">Send</button>
-            <button id="receiveButton" class="btn btn-secondary">Receive</button>
+        <div id="messages" class="messages">
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="chat {% if msg.username == 'test' %}chat-start{% else %}chat-end{% endif %}">
+                        <div class="chat-image avatar">
+                            <div class="w-10 rounded-full">
+                                <img
+                                    alt="{{ msg.username }}'s avatar"
+                                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                            </div>
+                        </div>
+                        <div class="chat-header">
+                            {{ msg.username }}
+                            <time class="text-xs opacity-50">{{ msg.received }}</time>
+                        </div>
+                        <div class="chat-bubble">{{ msg.message }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-messages">No messages to display.</div>
+            {% endif %}
         </div>
+
+        <!-- Form for sending messages -->
+        <form id="messageForm">
+            <div class="input-container">
+                <input type="text" id="messageInput" name="message" class="message-input" placeholder="Type your message here..." required />
+                <input type="hidden" name="topic" value="{{ chat_name }}" />  <!-- Set the topic dynamically -->
+                <input type="hidden" name="username" value="abhinav" />  <!-- Hardcoded username, replace as necessary -->
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
     </div>
-    <a href="{{ url_for('chat_list') }}" class="btn btn-back">Back to Chat List</a>
+    <a href="{{ url_for('chat_main') }}" class="btn btn-back">Back to Chat List</a>
 </div>
+
 {% endblock %}
